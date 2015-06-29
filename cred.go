@@ -1,3 +1,5 @@
+// Package cred Make twitter credential with anaconda.
+// cred file is located $HOME/.tw
 package cred
 
 import (
@@ -14,23 +16,23 @@ import (
 
 var confPath string
 
-// Config type has token information.
-type Config struct {
+// Credential type has tokens.
+type Credential struct {
 	AccessToken  string
 	AccessSecret string
 }
 
-func parseConf() (Config, error) {
+func parseConf() (Credential, error) {
 	confData, err := ioutil.ReadFile(confPath)
 	if err != nil {
-		log.Println("config file not found")
-		return Config{}, err
+		log.Println("Credential file not found")
+		return Credential{}, err
 	}
-	var c Config
+	var c Credential
 	err = json.Unmarshal(confData, &c)
 	if err != nil {
-		log.Println("config file can't parsed")
-		return Config{}, err
+		log.Println("Credential file can't parsed")
+		return Credential{}, err
 	}
 	return c, nil
 }
@@ -50,7 +52,7 @@ func makeCredential() error {
 		log.Println("authentification failed")
 		return err
 	}
-	c := Config{AccessToken: cred.Token, AccessSecret: cred.Secret}
+	c := Credential{AccessToken: cred.Token, AccessSecret: cred.Secret}
 	b, err := json.Marshal(c)
 	f, err := os.Create(confPath)
 	if err != nil {
@@ -74,13 +76,14 @@ func init() {
 	confPath = filepath.Join(home, ".tw")
 }
 
-// New make Config type which has tokens
-func New() (Config, error) {
+// New make Credential type which has tokens.
+// if $HOME/.tw is not exist, make .
+func New() (Credential, error) {
 	_, err := os.Stat(confPath)
 	if os.IsNotExist(err) {
 		err := makeCredential()
 		if err != nil {
-			return Config{}, nil
+			return Credential{}, nil
 		}
 	}
 	c, err := parseConf()
